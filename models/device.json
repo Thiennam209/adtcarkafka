@@ -1,0 +1,89 @@
+{
+    "@id": "dtmi:digitaltwins:Basic:Device;1",
+    "@type": "Interface",
+    "@context": [
+        "dtmi:dtdl:context;2"
+    ],
+    "displayName": "Device -v1",
+    "description": "Device data",
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "deviceid",
+      "displayName": "deviceid",
+      "description": "The unique id of the device",
+      "writable": true,
+      "schema": "string"
+    },
+    {
+      "@type": "Property",
+      "name": "oxys",
+      "displayName": "oxys",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "ats",
+      "displayName": "ats",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "pressure",
+      "displayName": "pressure",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "cps",
+      "displayName": "cps",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "aps",
+      "displayName": "aps",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "sas",
+      "displayName": "sas",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "vss",
+      "displayName": "vss",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "iat",
+      "displayName": "iat",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "maf",
+      "displayName": "maf",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "ect",
+      "displayName": "ect",
+      "writable": true,
+      "schema": "double"
+    }
+  ]
+}
