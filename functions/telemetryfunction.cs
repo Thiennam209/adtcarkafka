@@ -76,9 +76,8 @@ namespace My.Function
 
 
                 IConfiguration configuration = new ConfigurationBuilder()
-                                    .AddIniFile(System.Environment.CurrentDirectory + @"/getting-started.properties")
+                                    .AddIniFile(@"C:\home\getting-started.properties")
                                     .Build();
-
                 const string topic = "adtcar";
                 var json = JsonConvert.SerializeObject(turbineTelemetry, Newtonsoft.Json.Formatting.Indented);
                 using (var producer = new ProducerBuilder<string, string>(
