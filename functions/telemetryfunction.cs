@@ -79,32 +79,29 @@ namespace My.Function
                                     .AddIniFile(@"C:\home\getting-started.properties")
                                     .Build();
                 const string topic = "adtcar";
-                var json = JsonConvert.SerializeObject(turbineTelemetry, Newtonsoft.Json.Formatting.Indented);
-                log.LogInformation("producer.json" + json);
+                string json = JsonConvert.SerializeObject(turbineTelemetry, Newtonsoft.Json.Formatting.Indented);
 
                 using (var producer = new ProducerBuilder<string, string>(
                     configuration.AsEnumerable()).Build())
                 {
                     log.LogInformation("producer.Produce");
 
-                    producer.Produce(topic, new Message<string, string> { Key = "deviceid1", Value = json },
+                    producer.Produce(topic, new Message<string, string> { Key = "deviceid1", Value = "test" },
                    (deliveryReport) =>
                    {
                        log.LogInformation("producer.deliveryReport");
 
                        if (deliveryReport.Error.Code != Confluent.Kafka.ErrorCode.NoError)
                        {
-                           log.LogInformation($"Failed to deliver message: {deliveryReport.Error.Reason}");
+                           log.LogInformation($"Failed to deliver message");
                        }
                        else
                        {
-                           log.LogInformation($"Produced event to topic {topic}: key = {"deviceid1",-10} value = {json}");
+                           log.LogInformation($"Produced event");
                        }
                    });
                 }
-                log.LogInformation(@"C:\home\getting-started.properties");
 
-                updateProperty.AppendReplace("/deviceid", ID);
                 updateProperty.AppendReplace("/deviceid", ID);
                 updateProperty.AppendReplace("/oxys", oxys.Value<double>());
                 updateProperty.AppendReplace("/ats", ats.Value<double>());
