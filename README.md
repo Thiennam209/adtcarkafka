@@ -12,3 +12,4 @@ az iot hub connection-string show --resource-group ${projectname}-rg >> Azure_co
 
 https://adtautonomousfuncappuwm6xn7d2a.azurewebsites.net/api
 https://adtwindfuncappkpku2rzpus.azurewebsites.net/api
+https://adtcarfuncapprmkqxestru.azurewebsites.net/api

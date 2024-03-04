@@ -26,10 +26,10 @@ az config set extension.use_dynamic_install=yes_without_prompt
 az extension add --name azure-iot -y
 
 # echo 'retrieve files'
-git clone https://github.com/Thiennam209/adt-iot-car.git
+git clone https://github.com/Thiennam209/adtcarkafka.git
 
 # echo 'input model'
-deviceId=$(az dt model create -n $adtname --models ./adt-iot-car/models/device.json --query [].id -o tsv)
+deviceId=$(az dt model create -n $adtname --models ./adtcarkafka/models/device.json --query [].id -o tsv)
 
 # echo 'instantiate ADT Instances'
 
@@ -50,4 +50,4 @@ az dt route create --dt-name $adtname --endpoint-name "$egname-ep" --route-name 
 az eventgrid event-subscription create --name "$egname-broadcast-sub" --source-resource-id $egid --endpoint "$funcappid/functions/broadcast" --endpoint-type azurefunction
 
 # Retrieve and Upload models to blob storage
-az storage blob upload-batch --account-name $storagename -d $containername -s "./adt-iot-car/assets"
+az storage blob upload-batch --account-name $storagename -d $containername -s "./adtcarkafka/assets"
