@@ -11,8 +11,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
 using System.Collections.Generic;
-using Microsoft.Azure.SignalR.Protocol;
-
+using Confluent.Kafka;
+using Microsoft.Extensions.Configuration;
 
 
 namespace My.Function
@@ -24,25 +24,16 @@ namespace My.Function
         private static readonly HttpClient httpClient = new HttpClient();
         private static string adtServiceUrl = Environment.GetEnvironmentVariable("ADT_SERVICE_URL");
 
-
-
         [FunctionName("telemetryfunction")]
         public async void Run([EventGridTrigger] EventGridEvent eventGridEvent, ILogger log)
         {
             try
             {
-                var credentials = new DefaultAzureCredential();
-                log.LogInformation(credentials.ToString());
+                var credentials = new DefaultAzureCredential();
                 DigitalTwinsClient client = new DigitalTwinsClient(
                 new Uri(adtServiceUrl), credentials, new DigitalTwinsClientOptions
                 { Transport = new HttpClientTransport(httpClient) });
-                log.LogInformation($"ADT service client connection created.");
-                log.LogInformation($"eventGridEvent ::: {eventGridEvent}");
-                log.LogInformation($"eventGridEvent.Data ::: {eventGridEvent.Data}");
-                //if (eventGridEvent.Data.ToString().Contains("pressure"))
-                //{
                 JObject deviceMessage = (JObject)JsonConvert.DeserializeObject(eventGridEvent.Data.ToString());
-                log.LogInformation($"alertMessage ::: {deviceMessage}");
                 string deviceId = "deviceid1";
                 var ID = "deviceid1";
                 var oxys = deviceMessage["body"]["oxys"] != null ? deviceMessage["body"]["oxys"] : 0;
@@ -50,10 +41,11 @@ namespace My.Function
                 var _pressure = deviceMessage["body"]["pressure"] != null ? deviceMessage["body"]["pressure"] : 0;
                 double pressure = 0;
                 Random rnd = new Random();
-                if(_pressure.Value<double>() <= 1200)
+                if (_pressure.Value<double>() <= 1200)
                 {
-                   pressure = rnd.Next(20, 30);
-                } else
+                    pressure = rnd.Next(20, 30);
+                }
+                else
                 {
                     pressure = rnd.Next(40, 50);
                 }
@@ -65,17 +57,6 @@ namespace My.Function
                 var maf = deviceMessage["body"]["maf"] != null ? deviceMessage["body"]["maf"] : 0;
                 var ect = deviceMessage["body"]["ect"] != null ? deviceMessage["body"]["ect"] : 0;
 
-                log.LogInformation($"Device:{deviceId} Device Id is:{ID}");
-                log.LogInformation($"Device:{deviceId} oxys is:{oxys}");
-                log.LogInformation($"Device:{deviceId} ats is:{ats}");
-                log.LogInformation($"Device:{deviceId} pressure is:{pressure}");
-                log.LogInformation($"Device:{deviceId} cps is:{cps}");
-                log.LogInformation($"Device:{deviceId} aps is:{aps}");
-                log.LogInformation($"Device:{deviceId} sas is:{sas}");
-                log.LogInformation($"Device:{deviceId} vss is:{vss}");
-                log.LogInformation($"Device:{deviceId} iat is:{iat}");
-                log.LogInformation($"Device:{deviceId} maf is:{maf}");
-                log.LogInformation($"Device:{deviceId} ect is:{ect}");
 
                 var updateProperty = new JsonPatchDocument();
                 var turbineTelemetry = new Dictionary<string, Object>()
@@ -92,6 +73,33 @@ namespace My.Function
                     ["maf"] = maf,
                     ["ect"] = ect
                 };
+
+
+                IConfiguration configuration = new ConfigurationBuilder()
+                                    .AddIniFile(System.Environment.CurrentDirectory + @"/getting-started.properties")
+                                    .Build();
+
+                const string topic = "adtcar";
+                var json = JsonConvert.SerializeObject(turbineTelemetry, Newtonsoft.Json.Formatting.Indented);
+                using (var producer = new ProducerBuilder<string, string>(
+                    configuration.AsEnumerable()).Build())
+                {
+
+                    producer.Produce(topic, new Message<string, string> { Key = "deviceid1", Value = json },
+                   (deliveryReport) =>
+                   {
+                       if (deliveryReport.Error.Code != Confluent.Kafka.ErrorCode.NoError)
+                       {
+                           log.LogInformation($"Failed to deliver message: {deliveryReport.Error.Reason}");
+                       }
+                       else
+                       {
+                           log.LogInformation($"Produced event to topic {topic}: key = {"deviceid1",-10} value = {json}");
+                       }
+                   });
+                }
+                log.LogInformation(System.Environment.CurrentDirectory + @"/getting-started.properties");
+
                 updateProperty.AppendReplace("/deviceid", ID);
                 updateProperty.AppendReplace("/deviceid", ID);
                 updateProperty.AppendReplace("/oxys", oxys.Value<double>());
@@ -114,7 +122,7 @@ namespace My.Function
                 {
                     log.LogInformation(e.Message);
                 }
-            }
+            }
             catch (Exception e)
             {
                 log.LogInformation(e.Message);
