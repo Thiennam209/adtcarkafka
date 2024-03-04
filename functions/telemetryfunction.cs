@@ -80,13 +80,18 @@ namespace My.Function
                                     .Build();
                 const string topic = "adtcar";
                 var json = JsonConvert.SerializeObject(turbineTelemetry, Newtonsoft.Json.Formatting.Indented);
+                log.LogInformation("producer.json" + json);
+
                 using (var producer = new ProducerBuilder<string, string>(
                     configuration.AsEnumerable()).Build())
                 {
+                    log.LogInformation("producer.Produce");
 
                     producer.Produce(topic, new Message<string, string> { Key = "deviceid1", Value = json },
                    (deliveryReport) =>
                    {
+                       log.LogInformation("producer.deliveryReport");
+
                        if (deliveryReport.Error.Code != Confluent.Kafka.ErrorCode.NoError)
                        {
                            log.LogInformation($"Failed to deliver message: {deliveryReport.Error.Reason}");
@@ -97,7 +102,7 @@ namespace My.Function
                        }
                    });
                 }
-                log.LogInformation(System.Environment.CurrentDirectory + @"/getting-started.properties");
+                log.LogInformation(@"C:\home\getting-started.properties");
 
                 updateProperty.AppendReplace("/deviceid", ID);
                 updateProperty.AppendReplace("/deviceid", ID);
@@ -111,7 +116,6 @@ namespace My.Function
                 updateProperty.AppendReplace("/iat", iat.Value<double>());
                 updateProperty.AppendReplace("/maf", maf.Value<double>());
                 updateProperty.AppendReplace("/ect", ect.Value<double>());
-                log.LogInformation(updateProperty.ToString());
                 try
                 {
                     await client.PublishTelemetryAsync(deviceId, Guid.NewGuid().ToString(), JsonConvert.SerializeObject(turbineTelemetry));
